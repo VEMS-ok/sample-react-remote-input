@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 
-class TouchMessage
-{
+class TouchMessage {
     constructor(threshold)
     {
         this.threshold = threshold;
+        this.serverAddress = "127.0.0.1";
+        this.port = "80";
     }
 
     newTouch(startx, starty)
@@ -33,27 +34,47 @@ class TouchMessage
         if (sendMessage)
         {
             // mqtt send with lastx and lasty
-            console.log(`${this.lastx - this.startx}  ${this.lasty - this.starty}`)
+            console.log(`${this.serverAddress} ${this.port} ${this.lastx - this.startx}  ${this.lasty - this.starty}`)
         }
+    }
+
+    setPort(port)
+    {
+        this.port = port;
+    }
+
+    setAddress(address)
+    {
+        this.serverAddress = address;
+    }
+
+    getFullAddress()
+    {
+        return `${this.serverAddress}:${this.port}`;
     }
 }
 
 function TouchPad()
 {
+    const [touchMessage] = useState(new TouchMessage(50));
     const [textFeedback, setTextFeedback] = useState("Touch");
+    const [workingAddress, setWorkingAddress] = useState(touchMessage.getFullAddress());
+    const [started, setStarted] = useState(false);
     const touchPadRef = useRef();
-    let _started = false;
-    const touchMessage = new TouchMessage(50);
 
-    useEffect(() => {
-        touchPadRef.current.addEventListener("mousedown", onStart, {passive: false});
-        touchPadRef.current.addEventListener("touchstart", onStart, { passive: false });
-        touchPadRef.current.addEventListener("mouseup", onEnd, { passive: false });
-        touchPadRef.current.addEventListener("touchend", onEnd, { passive: false });
-        touchPadRef.current.addEventListener("mousemove", onMove, { passive: false });
-        touchPadRef.current.addEventListener("touchmove", onMove, { passive: false });
+    function setPort()
+    {
+        let val = prompt("Port", 80);
+        touchMessage.setPort(Number(val));
+        setWorkingAddress(touchMessage.getFullAddress());
+    }
 
-    }, [touchPadRef]);
+    function setAddress()
+    {
+        let val = prompt("Address", "127.0.0.1");
+        touchMessage.setAddress(val);
+        setWorkingAddress(touchMessage.getFullAddress());
+    }
 
     function getClientXY (e)
     {
@@ -74,25 +95,29 @@ function TouchPad()
 
     function onStart(e)
     {
-        e.preventDefault();
-        _started = true;
-        let [x, y] = getClientXY(e);
-        setTextFeedback(`Touch at ${x} ${y} `);
-        touchMessage.newTouch(x, y);
+        // Adding this since preventDefault cannot be used and avoid this being called again.
+        // Also, setting this as a non-passive callback intefers with other callbacks.
+        if (started === false)
+        {
+            setStarted(true);
+            let [x, y] = getClientXY(e);
+            setTextFeedback(`Touch at ${x} ${y} `);
+            touchMessage.newTouch(x, y);
+        }
     }
 
-    function onEnd(e)
+    function onEnd()
     {
-        e.preventDefault();
-        _started = false;
-        setTextFeedback("Touch");
+        if (started)
+        {
+            setStarted(false);
+            setTextFeedback("Touch");
+        }
     }
 
     function onMove(e)
     {
-        e.preventDefault();
-        /* console.log(started); */
-        if (_started)
+        if (started)
         {
             let [x, y] = getClientXY(e);
             setTextFeedback(`Touch at ${x} ${y} `);
@@ -103,7 +128,12 @@ function TouchPad()
     return (
         <div className="w-full">
             <p className="center">{textFeedback}</p>
-            <div ref={touchPadRef} className="border-solid border-2 border-sky-500 w-full h-96">
+            <p className="center">{workingAddress}</p>
+            <div className="flex space-x-2 center place-content-center p-2">
+                <button className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" onClick={setAddress}> Set Address</button>
+                <button className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" onClick={setPort}>Set Port</button>
+            </div>
+            <div ref={touchPadRef} className="border-solid border-2 border-sky-500 w-full h-96" onTouchMove={onMove} onTouchStart={onStart} onTouchEnd={onEnd} onMouseDown={onStart} onMouseUp={onEnd} onMouseMove={onMove}>
             </div >
         </div>
     );
