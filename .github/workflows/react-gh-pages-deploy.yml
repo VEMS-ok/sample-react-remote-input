@@ -1,0 +1,29 @@
+name: react-gh-pgaes-deploy
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        token: ${{ github.token }}
+        persist-credentials: true
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: git config --local user.name 'github-actions[bot]'
+    - run: git config --local user.email 'github-actions[bot]@users.noreply.github.com'
+    - run: npm install
+    - run: npm run build
+    - name: Deploy to GitHub Pages
+      uses: JamesIves/github-pages-deploy-action@v4.4.0
+      with:
+        branch: gh-pages
+        folder: build
