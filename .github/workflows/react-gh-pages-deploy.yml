@@ -3,6 +3,8 @@ name: react-gh-pgaes-deploy
 on:
   push:
     branches: [ "master" ]
+permissions:
+  contents: write
 
 jobs:
   build:
