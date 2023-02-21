@@ -1,16 +1,15 @@
 {
   "files": {
-    "main.css": "/sample-react-remote-input/static/css/main.073c9b0a.css",
-    "main.js": "/sample-react-remote-input/static/js/main.dcb30305.js",
+    "main.css": "/sample-react-remote-input/static/css/main.eb5400ed.css",
+    "main.js": "/sample-react-remote-input/static/js/main.c790ab32.js",
     "static/js/787.3158f66b.chunk.js": "/sample-react-remote-input/static/js/787.3158f66b.chunk.js",
-    "static/media/logo.svg": "/sample-react-remote-input/static/media/logo.6ce24c58023cc2f8fd88fe9d219db6c6.svg",
     "index.html": "/sample-react-remote-input/index.html",
-    "main.073c9b0a.css.map": "/sample-react-remote-input/static/css/main.073c9b0a.css.map",
-    "main.dcb30305.js.map": "/sample-react-remote-input/static/js/main.dcb30305.js.map",
+    "main.eb5400ed.css.map": "/sample-react-remote-input/static/css/main.eb5400ed.css.map",
+    "main.c790ab32.js.map": "/sample-react-remote-input/static/js/main.c790ab32.js.map",
     "787.3158f66b.chunk.js.map": "/sample-react-remote-input/static/js/787.3158f66b.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.073c9b0a.css",
-    "static/js/main.dcb30305.js"
+    "static/css/main.eb5400ed.css",
+    "static/js/main.c790ab32.js"
   ]
 }
