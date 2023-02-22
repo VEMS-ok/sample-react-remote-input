@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/sample-react-remote-input/static/css/main.eb5400ed.css",
-    "main.js": "/sample-react-remote-input/static/js/main.c790ab32.js",
+    "main.js": "/sample-react-remote-input/static/js/main.39a555ef.js",
     "static/js/787.3158f66b.chunk.js": "/sample-react-remote-input/static/js/787.3158f66b.chunk.js",
     "index.html": "/sample-react-remote-input/index.html",
     "main.eb5400ed.css.map": "/sample-react-remote-input/static/css/main.eb5400ed.css.map",
-    "main.c790ab32.js.map": "/sample-react-remote-input/static/js/main.c790ab32.js.map",
+    "main.39a555ef.js.map": "/sample-react-remote-input/static/js/main.39a555ef.js.map",
     "787.3158f66b.chunk.js.map": "/sample-react-remote-input/static/js/787.3158f66b.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.eb5400ed.css",
-    "static/js/main.c790ab32.js"
+    "static/js/main.39a555ef.js"
   ]
 }
