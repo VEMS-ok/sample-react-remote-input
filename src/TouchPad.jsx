@@ -17,16 +17,16 @@ class TouchMessage {
             clientId: Math.random().toString(16),
             /* username: mqtt.username, */
             /* password: mqtt.password, */
-            useSSL: false,
+            useSSL: true,
             /* onSuccess: onAction, */
             /* onFailure: onAction, */
-            protocolId: 'MQTT',
-            protocolVersion: 3,
+            /* protocolId: 'MQTT', */
+            /* protocolVersion: 3, */
             rejectUnauthorized: false,
             clean: true,
             /* reconnectPeriod: 20000, */
             /* connectTimeout: 30 * 1000, */
-            protocol: 'mqtt',
+            protocol: 'wss',
         };
 
         // If client exists, make sure it's disconnected
@@ -35,7 +35,7 @@ class TouchMessage {
             this.mqttClient.end(true);
         }
 
-        this.mqttClient = mqtt.connect(`mqtt://${this.serverAddress}:${this.port}`, us);
+        this.mqttClient = mqtt.connect(`wss://${this.serverAddress}:${this.port}`, us);
 
         // publish messages to UI
         ["connect", "end", "error", "close", "reconnect", "disconnect", "message"].forEach((val) => {
