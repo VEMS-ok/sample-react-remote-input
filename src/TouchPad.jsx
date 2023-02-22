@@ -43,8 +43,6 @@ class TouchMessage {
                 this.messagCallback(val);
             });
         });
-
-        this.mqttClient.publish("getReal3D/wandButtonDown", "True");
     }
 
     newTouch(startx, starty)
@@ -84,18 +82,25 @@ class TouchMessage {
         }
     }
 
-    setPort(port)
+    wandButtonUp()
     {
+        this.mqttClient.publish("getReal3D/wandButtonUp", "True");
+    }
+
+    wandButtonDown()
+    {
+        this.mqttClient.publish("getReal3D/wandButtonDown", "True");
+    }
+
+    setPort(port) {
         this.port = port;
     }
 
-    setAddress(address)
-    {
+    setAddress(address) {
         this.serverAddress = address;
     }
 
-    getFullAddress()
-    {
+    getFullAddress() {
         return `${this.serverAddress}:${this.port}`;
     }
 }
@@ -126,6 +131,16 @@ function TouchPad()
     function connect()
     {
         touchMessage.connect();
+    }
+
+    function wandButtonDown()
+    {
+        touchMessage.wandButtonDown();
+    }
+
+    function wandButtonUp()
+    {
+        touchMessage.wandButtonUp();
     }
 
     function getClientXY (e)
@@ -178,7 +193,7 @@ function TouchPad()
     }
 
     return (
-        <div className="w-full">
+        <div className="w-full overscroll-contain">
             <p className="center">{textFeedback}</p>
             <p className="center">Connection state: {message}</p>
             <p className="center">{workingAddress}</p>
@@ -187,8 +202,11 @@ function TouchPad()
                 <button className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" onClick={setPort}>Set Port</button>
                 <button className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" onClick={connect}>Connect</button>
             </div>
-            <div ref={touchPadRef} className="border-solid border-2 border-sky-500 w-full h-96" onTouchMove={onMove} onTouchStart={onStart} onTouchEnd={onEnd} onMouseDown={onStart} onMouseUp={onEnd} onMouseMove={onMove}>
+            <div ref={touchPadRef} className="border-solid border-2 border-sky-500 w-full h-96 overscroll-contain overscroll-y-contain" onTouchMove={onMove} onTouchStart={onStart} onTouchEnd={onEnd} onMouseDown={onStart} onMouseUp={onEnd} onMouseMove={onMove}>
             </div >
+            <div className="flex space-x-2 center place-content-center p-2">
+                <button className="inline-block w-48 h-16 px-6 py-2.5 bg-green-800 text-white font-large text-s rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-900 active:shadow-lg transition duration-150 ease-in-out" onMouseDown={wandButtonDown} onMouseUp={wandButtonUp} onTouchStart={wandButtonDown} onTouchEnd={wandButtonUp}>Wand button</button>
+            </div>
         </div>
     );
 }
