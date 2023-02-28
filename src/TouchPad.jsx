@@ -1,5 +1,6 @@
 import { useRef, useState } from "react";
 import mqtt from "precompiled-mqtt";
+import Dropdown from 'react-dropdown';
 
 class TouchMessage {
     constructor(threshold, messageCallback)
@@ -7,8 +8,10 @@ class TouchMessage {
         this.threshold = threshold;
         this.serverAddress = "127.0.0.1";
         this.port = 80;
+        this.protocol = "mqtt";
         this.messagCallback = messageCallback;
         this.mqttClient = null;
+        this.useSSL = true;
     }
 
     connect()
@@ -17,7 +20,7 @@ class TouchMessage {
             clientId: Math.random().toString(16),
             /* username: mqtt.username, */
             /* password: mqtt.password, */
-            useSSL: true,
+            useSSL: this.useSSL,
             /* onSuccess: onAction, */
             /* onFailure: onAction, */
             /* protocolId: 'MQTT', */
@@ -26,8 +29,10 @@ class TouchMessage {
             clean: true,
             /* reconnectPeriod: 20000, */
             /* connectTimeout: 30 * 1000, */
-            protocol: 'wss',
+            protocol: this.protocol,
         };
+
+        console.log("Connecting with: " + JSON.stringify(us));
 
         // If client exists, make sure it's disconnected
         if (this.mqttClient !== null)
@@ -35,7 +40,7 @@ class TouchMessage {
             this.mqttClient.end(true);
         }
 
-        this.mqttClient = mqtt.connect(`wss://${this.serverAddress}:${this.port}`, us);
+        this.mqttClient = mqtt.connect(this.getFullAddress(), us);
 
         // publish messages to UI
         ["connect", "end", "error", "close", "reconnect", "disconnect", "message"].forEach((val) => {
@@ -92,6 +97,12 @@ class TouchMessage {
         this.mqttClient.publish("getReal3D/wandButtonDown", "True");
     }
 
+    setProtcol(protocol)
+    {
+        this.protocol = protocol;
+        this.useSSL = this.protocol === "wss";
+    }
+
     setPort(port) {
         this.port = port;
     }
@@ -101,7 +112,7 @@ class TouchMessage {
     }
 
     getFullAddress() {
-        return `${this.serverAddress}:${this.port}`;
+        return `${this.protocol}://${this.serverAddress}:${this.port}`;
     }
 }
 
@@ -113,6 +124,12 @@ function TouchPad()
     const [workingAddress, setWorkingAddress] = useState(touchMessage.getFullAddress());
     const [started, setStarted] = useState(false);
     const touchPadRef = useRef();
+
+    function setProtocol(val)
+    {
+        touchMessage.setProtcol(val.value);
+        setWorkingAddress(touchMessage.getFullAddress());
+    }
 
     function setPort()
     {
@@ -198,6 +215,10 @@ function TouchPad()
             <p className="center">Connection state: {message}</p>
             <p className="center">{workingAddress}</p>
             <div className="flex space-x-2 center place-content-center p-2">
+                <div className="">
+                    Set Protocol
+                    <Dropdown placeholder={touchMessage.protocol} options={["wss", "ws", "mqtt"]} placeholderClassName="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" onChange={setProtocol} />
+                </div>
                 <button className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" onClick={setAddress}> Set Address</button>
                 <button className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" onClick={setPort}>Set Port</button>
                 <button className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" onClick={connect}>Connect</button>
