@@ -8,7 +8,7 @@ class TouchMessage {
         this.threshold = threshold;
         this.serverAddress = "127.0.0.1";
         this.port = 80;
-        this.protocol = "mqtt";
+        this.protocol = "ws";
         this.messagCallback = messageCallback;
         this.mqttClient = null;
         this.useSSL = true;
