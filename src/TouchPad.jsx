@@ -2,16 +2,49 @@ import { useRef, useState } from "react";
 import mqtt from "precompiled-mqtt";
 import Dropdown from 'react-dropdown';
 
+const LEFT = "left";
+const RIGHT = "right";
+
+class Touch {
+    constructor(threshold) {
+        this.threshold = threshold;
+    }
+
+    newTouch(startx, starty) {
+        this.startx = startx;
+        this.starty = starty;
+        this.lastx = startx;
+        this.lasty = starty;
+    }
+
+    setClientXY(x, y) {
+        let sendMessage = false;
+        if (Math.abs(x - this.lastx) > this.threshold)
+        {
+            sendMessage = true;
+            this.lastx = x;
+        }
+
+        if (Math.abs(y - this.lasty) > this.threshold)
+        {
+            sendMessage = true;
+            this.lasty = y;
+        }
+        return sendMessage;
+    }
+}
+
 class TouchMessage {
     constructor(threshold, messageCallback)
     {
-        this.threshold = threshold;
         this.serverAddress = "127.0.0.1";
         this.port = 80;
         this.protocol = "ws";
         this.messagCallback = messageCallback;
         this.mqttClient = null;
         this.useSSL = true;
+        this.leftTouch = new Touch(threshold);
+        this.rightTouch = new Touch(threshold);
     }
 
     connect()
@@ -50,39 +83,41 @@ class TouchMessage {
         });
     }
 
-    newTouch(startx, starty)
+    newTouch(startx, starty, side)
     {
-        this.startx = startx;
-        this.starty = starty;
-        this.lastx = startx;
-        this.lasty = starty;
+        if (side === LEFT) {
+            this.leftTouch.newTouch(startx, starty);
+        } else if (side === RIGHT) {
+            this.rightTouch.newTouch(startx, starty);
+        }
     }
 
-    setClientXY(x, y)
+    setClientXY(x, y, side)
     {
-        let sendMessage = false;
-        if (Math.abs(x - this.lastx) > this.threshold)
-        {
-            sendMessage = true;
-            this.lastx = x;
+        let touch;
+        if (side === LEFT) {
+            touch = this.leftTouch;
+        } else if (side === RIGHT) {
+            touch = this.rightTouch;
         }
 
-        if (Math.abs(y - this.lasty) > this.threshold)
-        {
-            sendMessage = true;
-            this.lasty = y;
-        }
+        let sendMessage = touch.setClientXY(x, y);
 
         if (sendMessage)
         {
-            let pitch = (this.lasty - this.starty) / 100;
-            let yaw = (this.lastx - this.startx) / 100;
+            let _x = (touch.lasty - touch.starty) / 100;
+            let _y = (touch.lastx - touch.startx) / 100;
             // mqtt send with lastx and lasty
-            console.log(`${this.serverAddress} ${this.port}   ${yaw}  ${pitch}`)
-            if (this.mqttClient.connected)
+            console.log(`${side} ${this.serverAddress} ${this.port}   ${_y}  ${_x}`)
+            if (this.mqttClient !== null && this.mqttClient.connected)
             {
-                this.mqttClient.publish("getReal3D/yawAxis", yaw.toString(5));
-                this.mqttClient.publish("getReal3D/pitchAxis", pitch.toString(5));
+                if (side === LEFT) {
+                    this.mqttClient.publish("getReal3D/strafeAxis", _y.toString(5));
+                    this.mqttClient.publish("getReal3D/forwardAxis", _x.toString(5));
+                } else if (side === RIGHT) {
+                    this.mqttClient.publish("getReal3D/yawAxis", _y.toString(5));
+                    this.mqttClient.publish("getReal3D/pitchAxis", _x.toString(5));
+                }
             }
         }
     }
@@ -122,8 +157,10 @@ function TouchPad()
     const [touchMessage] = useState(new TouchMessage(5, setMessage));
     const [textFeedback, setTextFeedback] = useState("Touch");
     const [workingAddress, setWorkingAddress] = useState(touchMessage.getFullAddress());
-    const [started, setStarted] = useState(false);
-    const touchPadRef = useRef();
+    const [startedRight, setStartedRight] = useState(false);
+    const [startedLeft, setStartedLeft] = useState(false);
+    const touchPadRef1 = useRef();
+    const touchPadRef2 = useRef();
 
     function setProtocol(val)
     {
@@ -160,7 +197,7 @@ function TouchPad()
         touchMessage.wandButtonUp();
     }
 
-    function getClientXY (e)
+    function getClientXY(e)
     {
         let x = 0, y = 0 ;
         if (e.type === "touchstart" || e.type === "touchmove")
@@ -177,35 +214,67 @@ function TouchPad()
         return [x, y];
     }
 
-    function onStart(e)
+    function onStartRight(e)
     {
         // Adding this since preventDefault cannot be used and avoid this being called again.
         // Also, setting this as a non-passive callback intefers with other callbacks.
-        if (started === false)
+        if (startedRight === false)
         {
-            setStarted(true);
+            setStartedRight(true);
             let [x, y] = getClientXY(e);
             setTextFeedback(`Touch at ${x} ${y} `);
-            touchMessage.newTouch(x, y);
+            touchMessage.newTouch(x, y, RIGHT);
         }
     }
 
-    function onEnd()
+    function onEndRight()
     {
-        if (started)
+        if (startedRight)
         {
-            setStarted(false);
+            setStartedRight(false);
             setTextFeedback("Touch");
         }
     }
 
-    function onMove(e)
+    function onMoveRight(e)
     {
-        if (started)
+        if (startedRight)
         {
             let [x, y] = getClientXY(e);
             setTextFeedback(`Touch at ${x} ${y} `);
-            touchMessage.setClientXY(x, y);
+            touchMessage.setClientXY(x, y, RIGHT);
+        }
+    }
+
+    function onStartLeft(e)
+    {
+        // Adding this since preventDefault cannot be used and avoid this being called again.
+        // Also, setting this as a non-passive callback intefers with other callbacks.
+        if (startedLeft === false)
+        {
+            setStartedLeft(true);
+            let [x, y] = getClientXY(e);
+            setTextFeedback(`Touch at ${x} ${y} `);
+            touchMessage.newTouch(x, y, LEFT);
+        }
+    }
+
+    function onEndLeft()
+    {
+        if (startedLeft)
+        {
+            setStartedLeft(false);
+            setTextFeedback("Touch");
+        }
+    }
+
+    function onMoveLeft(e)
+    {
+        if (startedLeft)
+        {
+            let [x, y] = getClientXY(e);
+            setTextFeedback(`Touch at ${x} ${y} `);
+            touchMessage.setClientXY(x, y, LEFT);
         }
     }
 
@@ -223,8 +292,28 @@ function TouchPad()
                 <button className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" onClick={setPort}>Set Port</button>
                 <button className="inline-block px-6 py-2.5 bg-blue-600 text-white font-medium text-xs rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-blue-800 active:shadow-lg transition duration-150 ease-in-out" onClick={connect}>Connect</button>
             </div>
-            <div ref={touchPadRef} className="border-solid border-2 border-sky-500 w-full h-96 overscroll-contain overscroll-y-contain" onTouchMove={onMove} onTouchStart={onStart} onTouchEnd={onEnd} onMouseDown={onStart} onMouseUp={onEnd} onMouseMove={onMove}>
-            </div >
+            <div className="flex space-x-2 p-2">
+                <div ref={touchPadRef1}
+                    className="border-solid border-2 border-sky-500 w-1/2 h-96 overscroll-contain overscroll-y-contain"
+                    onTouchMove={onMoveLeft}
+                    onTouchStart={onStartLeft}
+                    onTouchEnd={onEndLeft}
+                    onMouseDown={onStartLeft}
+                    onMouseUp={onEndLeft}
+                    onMouseMove={onMoveLeft}>
+                    <div className="select-none">left touch pad (forward/strafe)</div>
+                </div>
+                <div ref={touchPadRef2}
+                    className="border-solid border-2 border-sky-500 w-1/2 h-96 overscroll-contain overscroll-y-contain"
+                    onTouchMove={onMoveRight}
+                    onTouchStart={onStartRight}
+                    onTouchEnd={onEndRight}
+                    onMouseDown={onStartRight}
+                    onMouseUp={onEndRight}
+                    onMouseMove={onMoveRight}>
+                    <div className="select-none">right touch pad (pitch/yaw)</div>
+                </div >
+            </div>
             <div className="flex space-x-2 center place-content-center p-2">
                 <button className="inline-block w-48 h-16 px-6 py-2.5 bg-green-800 text-white font-large text-s rounded shadow-md hover:bg-blue-700 hover:shadow-lg focus:bg-blue-700 focus:shadow-lg focus:outline-none focus:ring-0 active:bg-green-900 active:shadow-lg transition duration-150 ease-in-out" onMouseDown={wandButtonDown} onMouseUp={wandButtonUp} onTouchStart={wandButtonDown} onTouchEnd={wandButtonUp}>Wand button</button>
             </div>
