@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/sample-react-remote-input/static/css/main.76028137.css",
-    "main.js": "/sample-react-remote-input/static/js/main.e008f158.js",
+    "main.css": "/sample-react-remote-input/static/css/main.ed3aaa7f.css",
+    "main.js": "/sample-react-remote-input/static/js/main.69d2aeb7.js",
     "static/js/787.3158f66b.chunk.js": "/sample-react-remote-input/static/js/787.3158f66b.chunk.js",
     "index.html": "/sample-react-remote-input/index.html",
-    "main.76028137.css.map": "/sample-react-remote-input/static/css/main.76028137.css.map",
-    "main.e008f158.js.map": "/sample-react-remote-input/static/js/main.e008f158.js.map",
+    "main.ed3aaa7f.css.map": "/sample-react-remote-input/static/css/main.ed3aaa7f.css.map",
+    "main.69d2aeb7.js.map": "/sample-react-remote-input/static/js/main.69d2aeb7.js.map",
     "787.3158f66b.chunk.js.map": "/sample-react-remote-input/static/js/787.3158f66b.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.76028137.css",
-    "static/js/main.e008f158.js"
+    "static/css/main.ed3aaa7f.css",
+    "static/js/main.69d2aeb7.js"
   ]
 }
