@@ -7,9 +7,12 @@ You can also run this app locally with `npm start` from the project root directo
 When you load the app, you would want to set the protocol, address and port then connect. If connected successfully you should see the `Connection status` set to `connect`.
 
 Currently, the app publishes on the following topics:
-- `getReal3D/yawAxis` - Touching/clicking and dragging up and down on the touchpad (blue rectangle space)
-- `getReal3D/pitchAxis` - Touching/clicking and dragging left/right on the touchpad
+- `getReal3D/forwardAxis` - Touching/clicking and dragging up and down on the left touchpad (blue rectangle space)
+- `getReal3D/strafeAxis` - Touching/clicking and dragging left and right on the left touchpad (blue rectangle space)
+- `getReal3D/yawAxis` - Touching/clicking and dragging up and down on the right touchpad (blue rectangle space)
+- `getReal3D/pitchAxis` - Touching/clicking and dragging left/right on the right touchpad (blue rectangle space)
 - `getReal3D/wandButtonUp` - Pressing down on the wand button
 - `getReal3D/wandButtonDown` - Releasing the wand button
 
-See the documentation of the [getRealRemoteInput](https://vems-ok.github.io/gr3d/classubc_1_1ok_1_1_v_e_m_s_1_1gr3d_1_1get_real_remote_input.html#details) for the list of topics a client could subscribe to by default.
+See the documentation of the [getRealRemoteInput](https://vems-ok.github.io/gr3d/classubc_1_1ok_1_1_v_e_m_s_1_1gr3d_1_1get_real_remote_input.html#details) for the list of topics a client could subscribe to by default. 
+See [src/TouchPad.jsx](src/TouchPad.jsx) to see the implementation.
